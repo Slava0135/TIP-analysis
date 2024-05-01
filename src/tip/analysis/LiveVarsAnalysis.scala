@@ -25,19 +25,31 @@ abstract class LiveVarsAnalysis(cfg: IntraproceduralProgramCfg)(implicit declDat
       case _: CfgFunExitNode => lattice.sublattice.bottom
       case r: CfgStmtNode =>
         r.data match {
-          case cond: AExpr => ??? //<--- Complete here
+          case cond: AExpr => s ++ vars(cond)
           case as: AAssignStmt =>
             as.left match {
-              case id: AIdentifier => ??? //<--- Complete here
+              case id: AIdentifier => s - declData(id) ++ vars(as.right)
               case _ => ???
             }
-          case varr: AVarStmt => ??? //<--- Complete here
-          case ret: AReturnStmt => ??? //<--- Complete here
-          case out: AOutputStmt => ??? //<--- Complete here
+          case varr: AVarStmt => s -- varr.declIds
+          case ret: AReturnStmt => s ++ vars(ret.exp)
+          case out: AOutputStmt => s ++ vars(out.exp)
           case _ => s
         }
       case _ => s
     }
+
+  private def vars(e: AExpr): Seq[ADeclaration] = {
+    e match {
+      case ACallFuncExpr(_, args, _) => args.flatMap(vars)
+      case id@AIdentifier(_, _) => Seq(declData(id))
+      case ABinaryOp(_, left, right, _) => vars(left) ++ vars(right)
+      case AUnaryOp(_, subexp, _) => vars(subexp)
+      case AAlloc(exp, _) => vars(exp)
+      case AVarRef(id, _) => Seq(declData(id))
+      case _ => List.empty
+    }
+  }
 }
 
 /**
