@@ -119,6 +119,7 @@ object Tip extends App {
         | -copyconstprop     enable copy constant propagation analysis
         | -uninitvars        enable possibly-uninitialized variables analysis
         | -taint             enable taint analysis
+        | -varsize           enable variable size analysis
         |
         | For the dataflow analyses, the choice of fixpoint solver can be chosen by these modifiers
         | immediately after the analysis name (default: use the simple fixpoint solver):
@@ -336,7 +337,7 @@ object Tip extends App {
           options.andersen = true
         case "-steensgaard" =>
           options.steensgaard = true
-        case "-sign" | "-livevars" | "-available" | "-vbusy" | "-reaching" | "-constprop" | "-interval" | "-copyconstprop" | "-uninitvars" | "-taint" =>
+        case "-sign" | "-livevars" | "-available" | "-vbusy" | "-reaching" | "-constprop" | "-interval" | "-copyconstprop" | "-uninitvars" | "-taint" | "-varsize" =>
           options.dfAnalysis += dfa.withName(args(i).drop(1)) -> {
             if (i + 1 < args.length && dfo.values.map(_.toString()).contains(args(i + 1))) {
               i = i + 1

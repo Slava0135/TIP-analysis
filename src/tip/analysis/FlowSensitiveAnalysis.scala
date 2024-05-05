@@ -63,6 +63,7 @@ object FlowSensitiveAnalysis {
       case AnalysisOption.`wlrw` =>
         Some(kind match {
           case Analysis.interval => new IntervalAnalysis.Intraprocedural.WorklistSolverWithWidening(typedCfg.left.get)
+          case Analysis.varsize => new VariableSizeAnalysis.Intraprocedural.WorklistSolverWithWidening(typedCfg.left.get)
           case _ => throw new RuntimeException(s"Unsupported solver option `$options` for the analysis $kind")
         })
       case AnalysisOption.`wlrwn` =>
@@ -166,6 +167,6 @@ object FlowSensitiveAnalysis {
     * A flow sensitive analysis kind
     */
   object Analysis extends Enumeration {
-    val sign, livevars, available, vbusy, reaching, constprop, interval, copyconstprop, uninitvars, taint = Value
+    val sign, livevars, available, vbusy, reaching, constprop, interval, copyconstprop, uninitvars, taint, varsize = Value
   }
 }
