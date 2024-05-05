@@ -31,12 +31,16 @@ trait IntervalAnalysisWidening extends ValueAnalysisMisc with Dependencies[CfgNo
 
   private def maxB(a: IntervalLattice.Num) = B.filter(_ <= a).max
 
-  def widenInterval(x: valuelattice.Element, y: valuelattice.Element): valuelattice.Element =
+  def widenInterval(x: valuelattice.Element, y: valuelattice.Element): valuelattice.Element = {
     (x, y) match {
       case (IntervalLattice.EmptyInterval, _) => y
       case (_, IntervalLattice.EmptyInterval) => x
-      case ((l1, h1), (l2, h2)) => ??? //<--- Complete here
+      case ((l1, h1), (l2, h2)) =>
+        val a = min(Set(l1, l2))
+        val b = max(Set(h1, h2))
+        (maxB(a), minB(b))
     }
+  }
 
   def widen(x: liftedstatelattice.Element, y: liftedstatelattice.Element): liftedstatelattice.Element =
     (x, y) match {
