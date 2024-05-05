@@ -22,6 +22,12 @@ object VarSize extends Enumeration {
     }.get.asInstanceOf[VarSizeVal]
   }
 
+  def appearingConstants(): Seq[Num] = {
+    values.flatMap {
+      case VarSizeVal((l, h)) => Seq(l, h)
+    }.toSeq
+  }
+
   val Any = VarSizeVal(EmptyInterval)
   val Bool = VarSizeVal((0, 1))
   val Byte = VarSizeVal((scala.Byte.MinValue, scala.Byte.MaxValue))
@@ -46,7 +52,7 @@ trait VariableSizeAnalysis extends ValueAnalysisMisc with Dependencies[CfgNode] 
   private val B = cfg.nodes.flatMap { n =>
     n.appearingConstants.map { x =>
       IntNum(x.value): Num
-    } + MInf + PInf
+    } + MInf + PInf ++ VarSize.appearingConstants()
   }
 
   def loophead(n: CfgNode): Boolean = indep(n).exists(cfg.rank(_) > cfg.rank(n))
