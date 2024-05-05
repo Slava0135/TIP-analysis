@@ -8,6 +8,8 @@ import tip.lattices.{IntervalLattice, LiftLattice}
 import tip.lattices.IntervalLattice._
 import tip.solvers.WorklistFixpointSolverWithReachabilityAndWidening
 
+import scala.collection.mutable
+
 object VarSize extends Enumeration {
   type VarSize = VarSizeVal
 
@@ -24,9 +26,19 @@ object VarSize extends Enumeration {
 
   def appearingConstants(): Seq[Num] = {
     values.flatMap {
-      case VarSizeVal((l, h)) => Seq(l, h)
-    }.toSeq
-  }
+      case VarSizeVal((l, h)) =>
+        var res = mutable.ListBuffer(l, h)
+        l match {
+          case IntNum(i) if i > scala.Int.MinValue => res.append(i - 1)
+          case _ =>
+        }
+        h match {
+          case IntNum(i) if i < scala.Int.MaxValue => res.append(i + 1)
+          case _ =>
+        }
+        res
+    }
+  }.toSeq
 
   val Any = VarSizeVal(EmptyInterval)
   val Bool = VarSizeVal((0, 1))
