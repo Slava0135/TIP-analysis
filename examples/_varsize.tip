@@ -1,0 +1,25 @@
+main () {
+    var bool, byte, char, int, bigint, any;
+    bool = 0;
+    byte = 0;
+    char = 0;
+    int = 0;
+    bigint = 0;
+    bool = 42 > 24;
+    if (bool) {
+        byte = 69;
+    } else {
+        byte = -69;
+        if (byte > bool) {
+            char = 127;
+        } else {
+            char = 1;
+        }
+        char = char + 1;
+    }
+    int = 1222333444;
+    bigint = int / 1000000;
+    bigint = -1000000;
+    bigint = int * int;
+    return 0;
+}

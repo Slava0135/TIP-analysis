@@ -43,7 +43,7 @@ object IntervalLattice extends LatticeWithOps {
     def compare(that: Num): Int =
       (this, that) match {
         case (x, y) if x == y => 0
-        case (IntNum(a), IntNum(b)) => a - b
+        case (IntNum(a), IntNum(b)) => a.compare(b)
         case (MInf, _) => -1
         case (_, PInf) => -1
         case (PInf, _) => 1
@@ -75,12 +75,22 @@ object IntervalLattice extends LatticeWithOps {
     val low = (a._1, b._1) match {
       case (_, MInf) | (MInf, _) => MInf
       case (_, PInf) | (PInf, _) => PInf
-      case (IntNum(i), IntNum(j)) => IntNum(i + j)
+      case (IntNum(i), IntNum(j)) =>
+        try {
+          IntNum(Math.addExact(i, j))
+        } catch {
+          case _: ArithmeticException => PInf
+        }
     }
     val high = (a._2, b._2) match {
       case (_, PInf) | (PInf, _) => PInf
       case (_, MInf) | (MInf, _) => MInf
-      case (IntNum(i), IntNum(j)) => IntNum(i + j)
+      case (IntNum(i), IntNum(j)) =>
+        try {
+          IntNum(Math.addExact(i, j))
+        } catch {
+          case _: ArithmeticException => PInf
+        }
     }
     (low, high)
   }
@@ -101,7 +111,11 @@ object IntervalLattice extends LatticeWithOps {
         val sb = signs(b)
         val sbNoZero = sb - 0
         val d = { (x: Int, y: Int) =>
-          x / y
+          try {
+            IntNum(Math.divideExact(x, y))
+          } catch {
+            case _: ArithmeticException => PInf
+          }
         }
         val arange = sbNoZero.map(s => opNum(a, s, d))
         (min(arange.map { x =>
@@ -163,7 +177,7 @@ object IntervalLattice extends LatticeWithOps {
   /**
     * Apples the binary operator `op` on the interval `a` and the int `b`.
     */
-  private def opNum(a: Element, b: Int, op: (Int, Int) => Int): Element =
+  private def opNum(a: Element, b: Int, op: (Int, Int) => Num): Element =
     a match {
       case (PInf, _) => EmptyInterval
       case (_, MInf) => EmptyInterval
@@ -184,7 +198,16 @@ object IntervalLattice extends LatticeWithOps {
         val sa = signs(a)
         val sb = signs(b)
         val mult = { (x: Int, y: Int) =>
-          x * y
+          try {
+            IntNum(Math.multiplyExact(x, y))
+          } catch {
+            case _: ArithmeticException =>
+              if (x.signum == y.signum) {
+                PInf
+              } else {
+                MInf
+              }
+          }
         }
         val arange = sb.map(s => opNum(a, s, mult))
         val brange = sa.map(s => opNum(b, s, mult))
@@ -202,13 +225,21 @@ object IntervalLattice extends LatticeWithOps {
     b match {
       case (MInf, PInf) => FullInterval
       case (PInf, MInf) => EmptyInterval
-      case (IntNum(j), PInf) => (MInf, IntNum(-j))
-      case (MInf, IntNum(j)) => (IntNum(-j), PInf)
-      case (IntNum(l), IntNum(h)) => (IntNum(math.min(-h, -l)), IntNum(math.max(-h, -l)))
+      case (IntNum(j), PInf) => (MInf, inv(j))
+      case (MInf, IntNum(j)) => (inv(j), PInf)
+      case (IntNum(l), IntNum(h)) => (min(Set(inv(h), inv(l))), max(Set(inv(h), inv(l))))
       case (MInf, MInf) => (PInf, PInf)
       case (PInf, PInf) => (MInf, MInf)
       case _ => ???
     }
+
+  private def inv(i: Int): Num = {
+    try {
+      IntNum(Math.negateExact(i))
+    } catch {
+      case _: ArithmeticException => PInf
+    }
+  }
 
   /**
     * Abstract `==` on intervals;

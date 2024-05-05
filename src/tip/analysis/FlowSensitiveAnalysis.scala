@@ -40,7 +40,7 @@ object FlowSensitiveAnalysis {
           case Analysis.livevars => new LiveVarsAnalysisSimpleSolver(typedCfg.left.get)
           case Analysis.available => new AvailableExpAnalysisSimpleSolver(typedCfg.left.get)
           //case Analysis.vbusy => new VeryBusyExpAnalysisSimpleSolver(typedCfg.left.get) <--- Complete here
-          //case Analysis.reaching => new ReachingDefAnalysisSimpleSolver(typedCfg.left.get) <--- Complete here
+          case Analysis.reaching => new ReachingDefAnalysisSimpleSolver(typedCfg.left.get)
           case Analysis.constprop => new ConstantPropagationAnalysis.Intraprocedural.SimpleSolver(typedCfg.left.get)
           case _ => throw new RuntimeException(s"Unsupported solver option `$options` for the analysis $kind")
         })
@@ -50,7 +50,7 @@ object FlowSensitiveAnalysis {
           case Analysis.livevars => new LiveVarsAnalysisWorklistSolver(typedCfg.left.get)
           case Analysis.available => new AvailableExpAnalysisWorklistSolver(typedCfg.left.get)
           //case Analysis.vbusy => new VeryBusyExpAnalysisWorklistSolver(typedCfg.left.get) <--- Complete here
-          //case Analysis.reaching => new ReachingDefAnalysisWorklistSolver(typedCfg.left.get) <--- Complete here
+          case Analysis.reaching => new ReachingDefAnalysisWorklistSolver(typedCfg.left.get)
           case Analysis.constprop => new ConstantPropagationAnalysis.Intraprocedural.WorklistSolver(typedCfg.left.get)
           case _ => throw new RuntimeException(s"Unsupported solver option `$options` for the analysis $kind")
         })
@@ -63,6 +63,7 @@ object FlowSensitiveAnalysis {
       case AnalysisOption.`wlrw` =>
         Some(kind match {
           case Analysis.interval => new IntervalAnalysis.Intraprocedural.WorklistSolverWithWidening(typedCfg.left.get)
+          case Analysis.varsize => new VariableSizeAnalysis.Intraprocedural.WorklistSolverWithWidening(typedCfg.left.get)
           case _ => throw new RuntimeException(s"Unsupported solver option `$options` for the analysis $kind")
         })
       case AnalysisOption.`wlrwn` =>
@@ -166,6 +167,6 @@ object FlowSensitiveAnalysis {
     * A flow sensitive analysis kind
     */
   object Analysis extends Enumeration {
-    val sign, livevars, available, vbusy, reaching, constprop, interval, copyconstprop, uninitvars, taint = Value
+    val sign, livevars, available, vbusy, reaching, constprop, interval, copyconstprop, uninitvars, taint, varsize = Value
   }
 }
