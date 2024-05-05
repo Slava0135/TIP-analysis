@@ -85,7 +85,7 @@ trait VariableSizeAnalysis extends ValueAnalysisMisc with Dependencies[CfgNode] 
 
 object VariableSizeAnalysis {
   object Intraprocedural {
-    class WorklistSolverWithWidening(cfg: IntraproceduralProgramCfg)(implicit declData: DeclarationData) extends FlowSensitiveAnalysis(false) {
+    class WorklistSolverWithWidening(cfg: IntraproceduralProgramCfg)(implicit declData: DeclarationData) extends FlowSensitiveAnalysis(true) {
       override def analyze(): Map[CfgNode, Map[ADeclaration, VarSize]] = {
         val impl = new WorklistSolverWithWideningImpl(cfg)
         impl.analyze().map {
